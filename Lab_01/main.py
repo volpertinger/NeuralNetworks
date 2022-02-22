@@ -1,5 +1,13 @@
 from BoolNeuron import BoolNeuron
 
 if __name__ == '__main__':
-    boolNeuron = BoolNeuron([0, 1, 0, 1, 0, 0, 0, 0])
+    '''''
+     __   __   __  __   __
+    (X1 + X2 + X3)(X2 + X3 + X4)
+    
+    F = 1 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 
+    '''''
+
+    boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0])
+    boolNeuron.teach()
     print(boolNeuron)
