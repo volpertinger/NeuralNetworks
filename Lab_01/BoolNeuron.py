@@ -2,6 +2,19 @@ from math import log2, pow
 
 
 class BoolNeuron:
+    class __Log:
+        def __init__(self, gen, weights, constantWeight, function, delta):
+            self.__gen = gen
+            self.__weights = weights
+            self.__constantWeight = constantWeight
+            self.__function = function
+            self.__delta = delta
+
+        def __str__(self):
+            return '-----Gen ' + str(self.__gen) + '\n' + 'Weights: ' + str(
+                self.__weights) + '\n' + 'ConstantWeight: ' + str(self.__constantWeight) + '\n' + 'Function: ' + str(
+                self.__function) + '\n' + 'Delta: ' + str(self.__delta) + '\n'
+
     def __init__(self, boolVector, isSimpleActivationFunction=True, norm=0.3):
         self.__isSimpleActivationFunction = isSimpleActivationFunction
         self.__norm = norm
@@ -11,14 +24,10 @@ class BoolNeuron:
         self.__boolVector = boolVector
         self.__variableSets = self.__getVariableSets()
         self.__generationsDelta = []
-        self.__log = ''
+        self.__log = []
 
-    def __addLog(self, isFinal, *data):
-        for element in data:
-            self.__log += str(element)
-            self.__log += '     '
-        if isFinal:
-            self.__log += '\n'
+    def __addLog(self, gen, weights, constantWeight, function, delta):
+        self.__log.append(self.__Log(gen, weights, constantWeight, function, delta))
 
     def __getVariableSets(self):
         result = []
@@ -80,9 +89,8 @@ class BoolNeuron:
             else:
                 currentFunction.append(self.__boolVector[i])  # for log
         self.__generationsDelta.append(generationDelta)
-        self.__addLog(True, 'Gen: ', len(self.__generationsDelta), 'Weights: ', self.__weights, 'ConstantWeight: ',
-                      self.__constantWeight, 'Function: ',
-                      currentFunction, 'Delta: ', generationDelta)
+        self.__addLog(len(self.__generationsDelta), self.__weights, self.__constantWeight, currentFunction,
+                      generationDelta)
         return generationDelta
 
     def __isCorrectBoolVector(self):
@@ -104,8 +112,11 @@ class BoolNeuron:
             return True
         return False
 
-    def getLog(self):
-        return self.__log
+    def getLogStr(self):
+        result = ''
+        for element in self.__log:
+            result += str(element)
+        return result
 
     def __str__(self):
         result = 'weights: ' + str(self.__weights) + '\n' + 'constant weight: ' + str(
