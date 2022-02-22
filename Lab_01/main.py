@@ -11,5 +11,6 @@ if __name__ == '__main__':
     boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], False)
     if boolNeuron.teach():
         print(boolNeuron)
+        print(boolNeuron.getLog())
     else:
         print('Error')

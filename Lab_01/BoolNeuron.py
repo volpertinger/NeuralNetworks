@@ -10,6 +10,15 @@ class BoolNeuron:
         self.__weights = [0.] * self.__size
         self.__boolVector = boolVector
         self.__variableSets = self.__getVariableSets()
+        self.__generationsDelta = []
+        self.__log = ''
+
+    def __addLog(self, isFinal, *data):
+        for element in data:
+            self.__log += str(element)
+            self.__log += '     '
+        if isFinal:
+            self.__log += '\n'
 
     def __getVariableSets(self):
         result = []
@@ -61,11 +70,19 @@ class BoolNeuron:
 
     def __solveGeneration(self):
         generationDelta = 0
+        currentFunction = []  # for log
         for i in range(int(pow(2, self.__size))):
             delta = self.__getDelta(i)
             if delta != 0:
+                currentFunction.append(self.__boolVector[i] - delta)  # for log
                 generationDelta += 1
                 self.__makeCorrection(delta, self.__variableSets[i], self.__getNet(i))
+            else:
+                currentFunction.append(self.__boolVector[i])  # for log
+        self.__generationsDelta.append(generationDelta)
+        self.__addLog(True, 'Gen: ', len(self.__generationsDelta), 'Weights: ', self.__weights, 'ConstantWeight: ',
+                      self.__constantWeight, 'Function: ',
+                      currentFunction, 'Delta: ', generationDelta)
         return generationDelta
 
     def __isCorrectBoolVector(self):
@@ -87,8 +104,11 @@ class BoolNeuron:
             return True
         return False
 
+    def getLog(self):
+        return self.__log
+
     def __str__(self):
         result = 'weights: ' + str(self.__weights) + '\n' + 'constant weight: ' + str(
-            self.__constantWeight) + '\n' + 'variableSets: ' + str(
-            self.__variableSets)
+            self.__constantWeight) + '\n' + 'generations delta: ' + str(
+            self.__generationsDelta) + '\n'
         return result
