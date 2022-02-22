@@ -1,4 +1,5 @@
-from math import log2, pow
+from math import log2, pow, floor, ceil
+from copy import deepcopy
 
 
 class BoolNeuron:
@@ -15,7 +16,7 @@ class BoolNeuron:
                 self.__weights) + '\n' + 'ConstantWeight: ' + str(self.__constantWeight) + '\n' + 'Function: ' + str(
                 self.__function) + '\n' + 'Delta: ' + str(self.__delta) + '\n'
 
-    def __init__(self, boolVector, isSimpleActivationFunction=True, norm=0.3):
+    def __init__(self, boolVector, isSimpleActivationFunction=True, teachFraction=1, norm=0.3):
         self.__isSimpleActivationFunction = isSimpleActivationFunction
         self.__norm = norm
         self.__constantWeight = 1
@@ -25,6 +26,10 @@ class BoolNeuron:
         self.__variableSets = self.__getVariableSets()
         self.__generationsDelta = []
         self.__log = []
+        self.__teachFraction = teachFraction
+        self.__teachIndexes = self.__getTeachIndexes()
+        self.__testIndexes = self.__getTestIndexes()
+        self.__isTrained = False
 
     def __addLog(self, gen, weights, constantWeight, function, delta):
         self.__log.append(self.__Log(gen, weights, constantWeight, function, delta))
@@ -44,6 +49,24 @@ class BoolNeuron:
             i += 1
             result[self.__size - i] = number % 2
             number = number // 2
+        return result
+
+    def __getTeachIndexes(self):
+        result = []
+        if not self.__isCorrectTeachFraction():
+            for i in range(len(self.__variableSets)):
+                result.append(i)
+            return result
+        numberOfTeachIndexes = ceil(len(self.__variableSets) * self.__teachFraction)
+        for i in range(numberOfTeachIndexes):
+            result.append(i)
+        return result
+
+    def __getTestIndexes(self):
+        result = []
+        for i in range(len(self.__variableSets)):
+            if self.__teachIndexes.count(i) == 0:
+                result.append(i)
         return result
 
     def __makeCorrection(self, delta, variableSet, net):
@@ -79,15 +102,15 @@ class BoolNeuron:
 
     def __solveGeneration(self):
         generationDelta = 0
-        currentFunction = []  # for log
-        for i in range(int(pow(2, self.__size))):
+        currentFunction = deepcopy(self.__boolVector)  # for log
+        for i in self.__teachIndexes:
             delta = self.__getDelta(i)
             if delta != 0:
-                currentFunction.append(self.__boolVector[i] - delta)  # for log
+                currentFunction[i] = self.__boolVector[i] - delta  # for log
                 generationDelta += 1
                 self.__makeCorrection(delta, self.__variableSets[i], self.__getNet(i))
             else:
-                currentFunction.append(self.__boolVector[i])  # for log
+                currentFunction[i] = self.__boolVector[i]  # for log
         self.__generationsDelta.append(generationDelta)
         self.__addLog(len(self.__generationsDelta), self.__weights, self.__constantWeight, currentFunction,
                       generationDelta)
@@ -99,16 +122,34 @@ class BoolNeuron:
                 return False
             return True
 
+    def __isCorrectTeachFraction(self):
+        if self.__teachFraction <= 0 or self.__teachFraction > 1:
+            return False
+        if floor(self.__teachFraction * len(self.__variableSets)) < 1:
+            return False
+        return True
+
     def __isCorrectData(self):
-        if (0 < self.__norm <= 1) and (log2(len(self.__boolVector)).is_integer()) and self.__isCorrectBoolVector():
+        if (0 < self.__norm <= 1) and (
+                log2(
+                    len(self.__boolVector)).is_integer()) and self.__isCorrectTeachFraction() and self.__isCorrectBoolVector():
             return True
         return False
+
+    def __testAfterTeach(self):
+        for i in self.__testIndexes:
+            delta = self.__getDelta(i)
+            if delta != 0:
+                self.__isTrained = False
+                return
+        self.__isTrained = True
 
     def teach(self):
         if self.__isCorrectData():
             generationDelta = self.__solveGeneration()
             while generationDelta > 0:
                 generationDelta = self.__solveGeneration()
+            self.__testAfterTeach()
             return True
         return False
 
@@ -116,7 +157,11 @@ class BoolNeuron:
         result = ''
         for element in self.__log:
             result += str(element)
+        result += 'Trained: ' + str(self.__isTrained)
         return result
+
+    def isTrained(self):
+        return self.__isTrained
 
     def __str__(self):
         result = 'weights: ' + str(self.__weights) + '\n' + 'constant weight: ' + str(
