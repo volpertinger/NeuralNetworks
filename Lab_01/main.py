@@ -8,6 +8,8 @@ if __name__ == '__main__':
     F = 1 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 
     '''''
 
-    boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0])
-    boolNeuron.teach()
-    print(boolNeuron)
+    boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], False)
+    if boolNeuron.teach():
+        print(boolNeuron)
+    else:
+        print('Error')

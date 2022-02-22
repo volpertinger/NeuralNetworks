@@ -28,10 +28,13 @@ class BoolNeuron:
             number = number // 2
         return result
 
-    def __makeCorrection(self, delta, variableSet):
+    def __makeCorrection(self, delta, variableSet, net):
+        deltaNorm = self.__norm * delta
+        if not self.__isSimpleActivationFunction:
+            deltaNorm *= 1 / (2 * pow((1 + abs(net)), 2))
         for i in range(self.__size):
-            self.__weights[i] = self.__weights[i] + self.__norm * delta * variableSet[i]
-            self.__constantWeight = self.__constantWeight + self.__norm * delta
+            self.__weights[i] = self.__weights[i] + deltaNorm * variableSet[i]
+            self.__constantWeight = self.__constantWeight + deltaNorm
 
     def __getNet(self, indexSet):
         result = self.__constantWeight
@@ -46,7 +49,7 @@ class BoolNeuron:
 
     def __getNotSimpleActivationFunction(self, indexSet):
         net = self.__getNet(indexSet)
-        return 0.5 * (net / (1 + abs(net)) + 1)
+        return round(0.5 * (net / (1 + abs(net)) + 1))
 
     def __getActivationFunction(self, indexSet):
         if self.__isSimpleActivationFunction:
@@ -62,7 +65,7 @@ class BoolNeuron:
             delta = self.__getDelta(i)
             if delta != 0:
                 generationDelta += 1
-                self.__makeCorrection(delta, self.__variableSets[i])
+                self.__makeCorrection(delta, self.__variableSets[i], self.__getNet(i))
         return generationDelta
 
     def __isCorrectBoolVector(self):
