@@ -181,6 +181,23 @@ class BoolNeuron:
             break
         return result
 
+    def setTeachIndexes(self, teachIndexes):
+        if teachIndexes is None:
+            return False
+
+        for element in teachIndexes:
+            if element < 0 or element >= len(self.__boolVector):
+                return False
+
+        teachIndexes.sort()
+        for i in range(len(teachIndexes) - 1):
+            if teachIndexes[i] == teachIndexes[i + 1]:
+                return False
+
+        self.__teachIndexes = teachIndexes
+        self.__testIndexes = self.__getTestIndexes()
+        return True
+
     def teach(self):
         if not self.__isCorrectData():
             return False

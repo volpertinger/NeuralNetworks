@@ -1,4 +1,5 @@
 from BoolNeuron import BoolNeuron
+from copy import deepcopy
 
 if __name__ == '__main__':
     '''''
@@ -9,8 +10,12 @@ if __name__ == '__main__':
     '''''
 
     boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0])
-    if boolNeuron.teach():
-        print(boolNeuron)
-        print(boolNeuron.getLogStr())
-    else:
-        print('Error')
+    minIndexes = boolNeuron.getMinTeachIndexes()
+    boolNeuron.setTeachIndexes(minIndexes)
+    boolNeuron.teach()
+    print(boolNeuron.getLogStr())
+    #if boolNeuron.teach():
+    #    print(boolNeuron)
+    #    print(boolNeuron.getLogStr())
+    #else:
+    #    print('Error')
