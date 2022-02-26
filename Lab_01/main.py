@@ -8,7 +8,7 @@ if __name__ == '__main__':
     F = 1 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 
     '''''
 
-    boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], False, 0.88)
+    boolNeuron = BoolNeuron([1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0])
     if boolNeuron.teach():
         print(boolNeuron)
         print(boolNeuron.getLogStr())

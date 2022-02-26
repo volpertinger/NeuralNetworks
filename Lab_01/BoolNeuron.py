@@ -4,22 +4,21 @@ from copy import deepcopy
 
 class BoolNeuron:
     class __Log:
-        def __init__(self, gen, weights, constantWeight, function, delta):
+        def __init__(self, gen, weights, function, delta):
             self.__gen = gen
             self.__weights = weights
-            self.__constantWeight = constantWeight
             self.__function = function
             self.__delta = delta
 
         def __str__(self):
             return '-----Gen ' + str(self.__gen) + '\n' + 'Weights: ' + str(
-                self.__weights) + '\n' + 'ConstantWeight: ' + str(self.__constantWeight) + '\n' + 'Function: ' + str(
+                self.__weights) + '\n' + 'Function: ' + str(
                 self.__function) + '\n' + 'Delta: ' + str(self.__delta) + '\n'
 
     def __init__(self, boolVector, isSimpleActivationFunction=True, teachFraction=1, norm=0.3):
         self.__isSimpleActivationFunction = isSimpleActivationFunction
         self.__norm = norm
-        self.__constantWeight = 1
+        self.__constantWeight = 0
         self.__size = int(log2(len(boolVector)))
         self.__weights = [0.] * self.__size
         self.__boolVector = boolVector
@@ -31,8 +30,10 @@ class BoolNeuron:
         self.__testIndexes = self.__getTestIndexes()
         self.__isTrained = False
 
-    def __addLog(self, gen, weights, constantWeight, function, delta):
-        self.__log.append(self.__Log(gen, weights, constantWeight, function, delta))
+    def __addLog(self, weights, function):
+        self.__log.append(
+            self.__Log(len(self.__generationsDelta), weights, function,
+                       self.__generationsDelta[len(self.__generationsDelta) - 1]))
 
     def __getVariableSets(self):
         result = []
@@ -84,7 +85,7 @@ class BoolNeuron:
         return result
 
     def __getSimpleActivationFunction(self, indexSet):
-        if self.__getNet(indexSet) > 0:
+        if self.__getNet(indexSet) >= 0:
             return 1
         return 0
 
@@ -100,20 +101,31 @@ class BoolNeuron:
     def __getDelta(self, indexSet):
         return self.__boolVector[indexSet] - self.__getActivationFunction(indexSet)
 
-    def __solveGeneration(self):
-        generationDelta = 0
-        currentFunction = deepcopy(self.__boolVector)  # for log
+    def __getWeightsForLog(self):
+        result = [self.__constantWeight]
+        for element in self.__weights:
+            result.append(element)
+        return result
+
+    def __getFunctionForLog(self):
+        result = deepcopy(self.__boolVector)
         for i in self.__teachIndexes:
             delta = self.__getDelta(i)
             if delta != 0:
-                currentFunction[i] = self.__boolVector[i] - delta  # for log
+                result[i] -= delta
+        return result
+
+    def __solveGeneration(self):
+        generationDelta = 0
+        currentWeights = self.__getWeightsForLog()
+        currentFunction = self.__getFunctionForLog()
+        for i in self.__teachIndexes:
+            delta = self.__getDelta(i)
+            if delta != 0:
                 generationDelta += 1
                 self.__makeCorrection(delta, self.__variableSets[i], self.__getNet(i))
-            else:
-                currentFunction[i] = self.__boolVector[i]  # for log
         self.__generationsDelta.append(generationDelta)
-        self.__addLog(len(self.__generationsDelta), self.__weights, self.__constantWeight, currentFunction,
-                      generationDelta)
+        self.__addLog(currentWeights, currentFunction)
         return generationDelta
 
     def __isCorrectBoolVector(self):
@@ -157,7 +169,7 @@ class BoolNeuron:
         result = ''
         for element in self.__log:
             result += str(element)
-        result += 'Trained: ' + str(self.__isTrained)
+        result += '-----' + 'Trained: ' + str(self.__isTrained)
         return result
 
     def isTrained(self):
