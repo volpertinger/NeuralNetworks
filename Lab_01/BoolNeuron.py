@@ -158,14 +158,37 @@ class BoolNeuron:
                 return
         self.__isTrained = True
 
+    def __reset(self, savedTeachIndexes):
+        self.__teachIndexes = savedTeachIndexes
+        self.__testIndexes = self.__getTestIndexes()
+        self.__weights = [0.] * self.__size
+        self.__log = []
+        self.__generationsDelta = []
+        self.__isTrained = False
+
+    def __getPossibleIndexes(self, size):
+        result = [[]]
+        for i in range(size):
+            result[0].append(i)
+        if size > len(self.__boolVector):
+            return result
+        while True:
+            lastIndexes = result[len(result) - 1]
+            newIndexes = moveIndexes(lastIndexes, size - 1, len(self.__boolVector))
+            if newIndexes is not False:
+                result.append(deepcopy(newIndexes))
+                continue
+            break
+        return result
+
     def teach(self):
-        if self.__isCorrectData():
+        if not self.__isCorrectData():
+            return False
+        generationDelta = self.__solveGeneration()
+        while generationDelta > 0:
             generationDelta = self.__solveGeneration()
-            while generationDelta > 0:
-                generationDelta = self.__solveGeneration()
-            self.__testAfterTeach()
-            return True
-        return False
+        self.__testAfterTeach()
+        return True
 
     def getLogStr(self):
         result = ''
@@ -177,8 +200,42 @@ class BoolNeuron:
     def isTrained(self):
         return self.__isTrained
 
+    def getMinTeachIndexes(self):
+        if not self.__isCorrectData():
+            return False
+        savedTeachIndexes = self.__teachIndexes
+        self.__testIndexes = self.__getTestIndexes()
+
+        result = self.__teachIndexes
+        currentSize = len(result)
+        isTrained = True
+        while currentSize > 0 and isTrained:
+            isTrained = False
+            for indexes in self.__getPossibleIndexes(currentSize):
+                self.__reset(indexes)
+                self.teach()
+                if self.isTrained():
+                    result = indexes
+                    currentSize -= 1
+                    isTrained = True
+                    break
+
+        self.__reset(savedTeachIndexes)
+        return result
+
     def __str__(self):
         result = 'weights: ' + str(self.__weights) + '\n' + 'constant weight: ' + str(
             self.__constantWeight) + '\n' + 'generations delta: ' + str(
             self.__generationsDelta) + '\n'
         return result
+
+
+def moveIndexes(array, index, wall):
+    if array[index] < wall - 1:
+        array[index] += 1
+        for i in range(index, len(array)):
+            array[i] = array[index] + i - index
+        return array
+    if index == 0:
+        return False
+    return moveIndexes(array, index - 1, array[index])
