@@ -1,4 +1,4 @@
-from math import log2, pow, floor, ceil
+from math import log2, pow
 from copy import deepcopy
 
 
@@ -15,7 +15,7 @@ class BoolNeuron:
                 self.__weights) + '\n' + 'Function: ' + str(
                 self.__function) + '\n' + 'Delta: ' + str(self.__delta) + '\n'
 
-    def __init__(self, boolVector, isSimpleActivationFunction=True, teachFraction=1, norm=0.3):
+    def __init__(self, boolVector, isSimpleActivationFunction=True, teachIndexes=None, norm=0.3):
         self.__isSimpleActivationFunction = isSimpleActivationFunction
         self.__norm = norm
         self.__constantWeight = 0
@@ -25,8 +25,7 @@ class BoolNeuron:
         self.__variableSets = self.__getVariableSets()
         self.__generationsDelta = []
         self.__log = []
-        self.__teachFraction = teachFraction
-        self.__teachIndexes = self.__getTeachIndexes()
+        self.__teachIndexes = self.__getTeachIndexes(teachIndexes)
         self.__testIndexes = self.__getTestIndexes()
         self.__isTrained = False
 
@@ -52,16 +51,26 @@ class BoolNeuron:
             number = number // 2
         return result
 
-    def __getTeachIndexes(self):
+    def __getAllTeachIndexes(self):
         result = []
-        if not self.__isCorrectTeachFraction():
-            for i in range(len(self.__variableSets)):
-                result.append(i)
-            return result
-        numberOfTeachIndexes = ceil(len(self.__variableSets) * self.__teachFraction)
-        for i in range(numberOfTeachIndexes):
+        for i in range(len(self.__boolVector)):
             result.append(i)
         return result
+
+    def __getTeachIndexes(self, teachIndexes):
+        if teachIndexes is None:
+            return self.__getAllTeachIndexes()
+
+        for element in teachIndexes:
+            if element < 0 or element >= len(self.__boolVector):
+                return self.__getAllTeachIndexes()
+
+        teachIndexes.sort()
+        for i in range(len(teachIndexes) - 1):
+            if teachIndexes[i] == teachIndexes[i + 1]:
+                return self.__getAllTeachIndexes()
+
+        return teachIndexes
 
     def __getTestIndexes(self):
         result = []
@@ -134,17 +143,10 @@ class BoolNeuron:
                 return False
             return True
 
-    def __isCorrectTeachFraction(self):
-        if self.__teachFraction <= 0 or self.__teachFraction > 1:
-            return False
-        if floor(self.__teachFraction * len(self.__variableSets)) < 1:
-            return False
-        return True
-
     def __isCorrectData(self):
         if (0 < self.__norm <= 1) and (
                 log2(
-                    len(self.__boolVector)).is_integer()) and self.__isCorrectTeachFraction() and self.__isCorrectBoolVector():
+                    len(self.__boolVector)).is_integer()) and self.__isCorrectBoolVector():
             return True
         return False
 
