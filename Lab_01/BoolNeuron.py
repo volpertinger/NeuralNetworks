@@ -1,4 +1,4 @@
-from math import log2, pow
+from math import log2, pow, exp
 from copy import deepcopy
 
 
@@ -82,7 +82,7 @@ class BoolNeuron:
     def __makeCorrection(self, delta, variableSet, net):
         deltaNorm = self.__norm * delta
         if not self.__isSimpleActivationFunction:
-            deltaNorm *= 1 / (2 * pow((1 + abs(net)), 2))
+            deltaNorm *= 2 / (pow(exp(net) + exp(-net), 2))
         for i in range(self.__size):
             self.__weights[i] = self.__weights[i] + deltaNorm * variableSet[i]
             self.__constantWeight = self.__constantWeight + deltaNorm
@@ -100,7 +100,7 @@ class BoolNeuron:
 
     def __getNotSimpleActivationFunction(self, indexSet):
         net = self.__getNet(indexSet)
-        return round(0.5 * (net / (1 + abs(net)) + 1))
+        return round(1 / 2 * (1 + (exp(net) - exp(-net)) / (exp(net) + exp(-net))))
 
     def __getActivationFunction(self, indexSet):
         if self.__isSimpleActivationFunction:
@@ -162,6 +162,7 @@ class BoolNeuron:
         self.__teachIndexes = savedTeachIndexes
         self.__testIndexes = self.__getTestIndexes()
         self.__weights = [0.] * self.__size
+        self.__constantWeight = 0.
         self.__log = []
         self.__generationsDelta = []
         self.__isTrained = False
