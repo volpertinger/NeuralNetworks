@@ -10,16 +10,19 @@ if __name__ == '__main__':
 
     function = [0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1]
 
+    print("Simple function, all vectors")
     boolNeuron = BoolNeuron(function)
     boolNeuron.teach()
     print(boolNeuron.getLogStr())
     print()
 
+    print("Not Simple function, all vectors")
     boolNeuron = BoolNeuron(function, False)
     boolNeuron.teach()
     print(boolNeuron.getLogStr())
     print()
 
+    print("Simple function, minimum vectors")
     boolNeuron = BoolNeuron(function)
     minIndexes = boolNeuron.getMinTeachIndexes()
     boolNeuron.setTeachIndexes(minIndexes)
@@ -28,6 +31,7 @@ if __name__ == '__main__':
     print(boolNeuron.getLogStr())
     print()
 
+    print("Not Simple function, minimum vectors")
     boolNeuron = BoolNeuron(function, False)
     minIndexes = boolNeuron.getMinTeachIndexes()
     boolNeuron.setTeachIndexes(minIndexes)
