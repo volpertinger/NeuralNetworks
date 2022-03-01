@@ -61,10 +61,10 @@ class NeuralNetworkPlot:
         rpmMax = 0
         for i in range(self.__neuronsAmount, self.__pointsAmount):
             forecastDot = self.__getNet(i)
+            delta = self.__dots[i].y - forecastDot
             rpm += pow((self.__dots[i].y - forecastDot), 2)
             if rpm > rpmMax:
                 rpmMax = rpm
-            delta = self.__dots[i].y - forecastDot
             if rpm > self.__maxDelta:
                 rpm = 0
                 self.__makeCorrection(delta, i)
@@ -139,4 +139,4 @@ class NeuralNetworkPlot:
         deltaNorm = self.__norm * delta
         self.__weights[0] += deltaNorm
         for i in range(self.__neuronsAmount):
-            self.__weights[i + 1] += deltaNorm * self.__dots[index + i - self.__neuronsAmount].y
+            self.__weights[i + 1] += deltaNorm * self.__dots[index + i - self.__neuronsAmount].x
