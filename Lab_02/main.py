@@ -8,7 +8,7 @@ if __name__ == '__main__':
     '''''
     leftWall = -5
     rightWall = 5
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 3000)
+    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 5000, 80, 4)
     # neuralNetwork.plotFunction()
     neuralNetwork.teach()
     neuralNetwork.plotForecast()

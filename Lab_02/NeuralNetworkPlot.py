@@ -7,7 +7,6 @@ from copy import deepcopy
 
 def standardFunction(x):
     return exp(-0.1 * pow(x, 2))
-    # return x ** 2
 
 
 class NeuralNetworkPlot:
@@ -19,8 +18,8 @@ class NeuralNetworkPlot:
         def __str__(self):
             return '(' + str(self.x) + '|' + str(self.y) + ')'
 
-    def __init__(self, leftWall, rightWall, maxGenerations=None, pointsAmount=20, neuronsAmount=4, norm=0.1,
-                 maxDelta=0, function=standardFunction):
+    def __init__(self, leftWall, rightWall, maxGenerations=None, pointsAmount=20, neuronsAmount=4, norm=0.01,
+                 maxDelta=0.05, isGoToZero=True, function=standardFunction):
         self.__leftWall = leftWall
         self.__rightWall = rightWall
         self.__pointsAmount = pointsAmount
@@ -31,7 +30,8 @@ class NeuralNetworkPlot:
         self.__maxDelta = maxDelta
         self.__maxGenerations = maxGenerations
         self.__norm = norm
-        self.__weights = [0] * (neuronsAmount + 1)  # примерно тут я решил не говнокодить и в индексе 0 - вес константы
+        self.__weights = [0] * (neuronsAmount + 1)
+        self.__isGoToZero = isGoToZero
 
     def __str__(self):
         return str(self.__weights)
@@ -48,9 +48,7 @@ class NeuralNetworkPlot:
         delta = (self.__rightWall - self.__leftWall) / self.__pointsAmount
         for i in range(self.__pointsAmount):
             x = self.__dots[len(self.__dots) - 1].x + delta * i
-            # x = self.__leftWall + delta * i
             self.__forecastDots.append(self.__Dot(x, self.__getNet(i + self.__pointsAmount)))
-            # self.__forecastDots.append(self.__Dot(x, self.__getNet(i) + self.__neuronsAmount))
 
     def __isRightArguments(self):
         if (self.__rightWall < self.__leftWall) or (self.__maxDelta < 0):
@@ -125,7 +123,9 @@ class NeuralNetworkPlot:
         return True
 
     def __getNet(self, index):
-        result = self.__weights[0]
+        result = 0
+        if not self.__isGoToZero:
+            result += self.__weights[0]
         for i in range(self.__neuronsAmount):
             if index + i - self.__neuronsAmount < len(self.__dots):
                 result += self.__weights[i + 1] * self.__dots[index + i - self.__neuronsAmount].y
