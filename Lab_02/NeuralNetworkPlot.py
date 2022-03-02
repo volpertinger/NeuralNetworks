@@ -56,26 +56,37 @@ class NeuralNetworkPlot:
         return True
 
     def __solveGeneration(self):
-        rpm = 0  # квадрат среднеквадратичной погрешности
+        rpm = 0
         rpmMax = 0
         for i in range(self.__neuronsAmount, self.__pointsAmount):
             forecastDot = self.__getNet(i)
             delta = self.__dots[i].y - forecastDot
             rpm += pow(delta, 2)
+            rpmMax += rpm
             if sqrt(rpm) > self.__maxDelta:
-                rpmMax = sqrt(rpm)
                 rpm = 0
                 self.__makeCorrection(delta, i)
-        return rpmMax
+        return sqrt(rpmMax)
+
+    def __solveRPM(self):
+        rpm = 0
+        for i in range(self.__pointsAmount + self.__neuronsAmount, 2 * self.__pointsAmount):
+            forecastDot = self.__getNet(i)
+            delta = self.__function(self.__forecastDots[i - self.__pointsAmount].x) - forecastDot
+            rpm += pow(delta, 2)
+        return sqrt(rpm)
 
     def __teachByMaxGenerations(self):
+        generationDelta = 0
         for i in range(self.__maxGenerations):
-            self.__solveGeneration()
+            generationDelta = self.__solveGeneration()
+        return generationDelta
 
     def __teachByMaxDelta(self):
         generationDelta = self.__solveGeneration()
         while generationDelta > self.__maxDelta:
             generationDelta = self.__solveGeneration()
+        return generationDelta
 
     def plotForecast(self):
         yDots = []
@@ -120,7 +131,7 @@ class NeuralNetworkPlot:
         else:
             self.__teachByMaxDelta()
         self.__setForecastDots()
-        return True
+        return self.__solveRPM()
 
     def __getNet(self, index):
         result = 0
