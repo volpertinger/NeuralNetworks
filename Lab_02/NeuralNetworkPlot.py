@@ -18,7 +18,7 @@ class NeuralNetworkPlot:
         def __str__(self):
             return '(' + str(self.x) + '|' + str(self.y) + ')'
 
-    def __init__(self, leftWall, rightWall, maxGenerations=None, pointsAmount=20, neuronsAmount=4, norm=0.01,
+    def __init__(self, leftWall, rightWall, maxGenerations=None, pointsAmount=80, neuronsAmount=4, norm=0.01,
                  maxDelta=0.05, isGoToZero=True, function=standardFunction):
         self.__leftWall = leftWall
         self.__rightWall = rightWall

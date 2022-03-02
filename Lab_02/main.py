@@ -6,9 +6,23 @@ if __name__ == '__main__':
     a = -5
     b = 5
     '''''
+
     leftWall = -5
     rightWall = 5
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 5000, 80, 4)
-    # neuralNetwork.plotFunction()
+
+    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 2000)
+    neuralNetwork.plotFunction()
+    neuralNetwork.teach()
+    neuralNetwork.plotForecast()
+
+    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 4000)
+    neuralNetwork.teach()
+    neuralNetwork.plotForecast()
+
+    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000)
+    neuralNetwork.teach()
+    neuralNetwork.plotForecast()
+
+    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 16000)
     neuralNetwork.teach()
     neuralNetwork.plotForecast()
