@@ -7,6 +7,7 @@ from copy import deepcopy
 
 def standardFunction(x):
     return exp(-0.1 * pow(x, 2))
+    # return x ** 2
 
 
 class NeuralNetworkPlot:
@@ -18,8 +19,8 @@ class NeuralNetworkPlot:
         def __str__(self):
             return '(' + str(self.x) + '|' + str(self.y) + ')'
 
-    def __init__(self, leftWall, rightWall, maxGenerations=None, pointsAmount=20, neuronsAmount=4, norm=0.3,
-                 maxDelta=0.1, function=standardFunction):
+    def __init__(self, leftWall, rightWall, maxGenerations=None, pointsAmount=20, neuronsAmount=4, norm=0.1,
+                 maxDelta=0, function=standardFunction):
         self.__leftWall = leftWall
         self.__rightWall = rightWall
         self.__pointsAmount = pointsAmount
@@ -27,7 +28,7 @@ class NeuralNetworkPlot:
         self.__function = function
         self.__dots = self.__getDots()
         self.__forecastDots = []
-        self.__maxDelta = pow(maxDelta, 2)  # чтобы потом кучу раз не считать среднеквадратичную
+        self.__maxDelta = maxDelta
         self.__maxGenerations = maxGenerations
         self.__norm = norm
         self.__weights = [0] * (neuronsAmount + 1)  # примерно тут я решил не говнокодить и в индексе 0 - вес константы
@@ -37,18 +38,18 @@ class NeuralNetworkPlot:
 
     def __getDots(self):
         result = []
-        delta = (self.__rightWall - self.__leftWall + 1) / self.__pointsAmount
+        delta = (self.__rightWall - self.__leftWall) / self.__pointsAmount
         for i in range(self.__pointsAmount):
             x = self.__leftWall + delta * i
             result.append(self.__Dot(x, self.__function(x)))
         return result
 
     def __setForecastDots(self):
-        delta = (self.__rightWall - self.__leftWall + 1) / self.__pointsAmount
+        delta = (self.__rightWall - self.__leftWall) / self.__pointsAmount
         for i in range(self.__pointsAmount):
             x = self.__dots[len(self.__dots) - 1].x + delta * i
             # x = self.__leftWall + delta * i
-            self.__forecastDots.append(self.__Dot(x, self.__getNet(i + self.__pointsAmount - 1)))
+            self.__forecastDots.append(self.__Dot(x, self.__getNet(i + self.__pointsAmount)))
             # self.__forecastDots.append(self.__Dot(x, self.__getNet(i) + self.__neuronsAmount))
 
     def __isRightArguments(self):
@@ -62,10 +63,9 @@ class NeuralNetworkPlot:
         for i in range(self.__neuronsAmount, self.__pointsAmount):
             forecastDot = self.__getNet(i)
             delta = self.__dots[i].y - forecastDot
-            rpm += pow((self.__dots[i].y - forecastDot), 2)
-            if rpm > rpmMax:
-                rpmMax = rpm
-            if rpm > self.__maxDelta:
+            rpm += pow(delta, 2)
+            if sqrt(rpm) > self.__maxDelta:
+                rpmMax = sqrt(rpm)
                 rpm = 0
                 self.__makeCorrection(delta, i)
         return rpmMax
@@ -128,15 +128,16 @@ class NeuralNetworkPlot:
         result = self.__weights[0]
         for i in range(self.__neuronsAmount):
             if index + i - self.__neuronsAmount < len(self.__dots):
-                result += self.__weights[i + 1] * self.__dots[index + i - self.__neuronsAmount].x
+                result += self.__weights[i + 1] * self.__dots[index + i - self.__neuronsAmount].y
                 continue
             if index + i - self.__neuronsAmount < len(self.__dots) + len(self.__forecastDots):
                 result += self.__weights[i + 1] * self.__forecastDots[
-                    index + i - self.__neuronsAmount - len(self.__dots) + 1].x
+                    index + i - self.__neuronsAmount - len(self.__dots)].y
         return result
 
     def __makeCorrection(self, delta, index):
         deltaNorm = self.__norm * delta
         self.__weights[0] += deltaNorm
         for i in range(self.__neuronsAmount):
-            self.__weights[i + 1] += deltaNorm * self.__dots[index + i - self.__neuronsAmount].x
+            self.__weights[i + 1] += deltaNorm * self.__dots[index + i - self.__neuronsAmount].y
+        return
