@@ -123,6 +123,15 @@ class NeuralNetworkPlot:
         plt.grid(True)
         plt.show()
 
+    def getMaxGenerations(self):
+        return self.__maxGenerations
+
+    def getNeuronsAmount(self):
+        return self.__neuronsAmount
+
+    def getNorm(self):
+        return self.__norm
+
     def teach(self):
         if not self.__isRightArguments():
             return False

@@ -9,40 +9,26 @@ if __name__ == '__main__':
 
     leftWall = -5
     rightWall = 5
-
-    # Зафиксируем параметры кроме количества эпох
-
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 2000)
-    neuralNetwork.plotFunction()
-    print('M=2000: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
-
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 4000)
-    print('M=4000: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
+    pointsForRPM = 10
 
     neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000)
-    print('M=8000: ' + str(neuralNetwork.teach()))
+    neuralNetwork.plotFunction()
+    neuralNetwork.teach()
     neuralNetwork.plotForecast()
 
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 16000)
-    print('M=16000: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
+    # Зафиксируем параметры кроме количества эпох
+    for i in range(pointsForRPM):
+        neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, (i + 1) * 1500)
+        print('M = ' + str(neuralNetwork.getMaxGenerations()) + ' | ' + str(neuralNetwork.teach()))
+    print()
+
+    # Зафиксируем параметры кроме размера окна
+    for i in range(2, pointsForRPM + 2):
+        neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000, 80, i)
+        print('P = ' + str(neuralNetwork.getNeuronsAmount()) + ' | ' + str(neuralNetwork.teach()))
+    print()
 
     # Зафиксируем параметры кроме нормы обучения
-
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000, 80, 4, 0.5)
-    print('Norm=0.5: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
-
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000, 80, 4, 0.3)
-    print('Norm=0.3: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
-
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000, 80, 4, 0.1)
-    print('Norm=0.1: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
-
-    neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000, 80, 4, 0.01)
-    print('Norm=0.01: ' + str(neuralNetwork.teach()))
-    neuralNetwork.plotForecast()
+    for i in range(pointsForRPM):
+        neuralNetwork = NeuralNetworkPlot(leftWall, rightWall, 8000, 80, 4, 0.01 * (pow(i + 1, 2)))
+        print('N = ' + str(neuralNetwork.getNorm()) + ' | ' + str(neuralNetwork.teach()))
