@@ -9,6 +9,7 @@ if __name__ == '__main__':
     '''''
 
     function = [0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1]
+    function = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0]
 
     print("Simple function, all vectors")
     boolNeuron = BoolNeuron(function)
