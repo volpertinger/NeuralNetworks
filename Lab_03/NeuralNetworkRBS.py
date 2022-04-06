@@ -15,13 +15,11 @@ class NeuralNetworkRBS:
                 self.__weights) + '\n' + 'Function: ' + str(
                 self.__function) + '\n' + 'Delta: ' + str(self.__delta) + '\n'
 
-    def __init__(self, function, isSimpleActivationFunction, norm=0.3, teachIndexes=None):
+    def __init__(self, function, norm=0.3, teachIndexes=None):
         # вектор значений функции
         self.__function = function
         # количество переменных в функции
         self.__size = self.__getVariablesCount()
-        # простая или сложная функция активации
-        self.__isSimpleActivationFunction = isSimpleActivationFunction
         # норма обучения
         self.__norm = norm
         # число центров (0 или 1) и количество центров
@@ -110,8 +108,8 @@ class NeuralNetworkRBS:
 
     # возвращает значение простой функцию активации
     @staticmethod
-    def __getSimpleActivationFunction(value):
-        if value >= 0:
+    def __getActivationFunction(value):
+        if value > 0:
             return 1
         return 0
 
@@ -121,7 +119,7 @@ class NeuralNetworkRBS:
         result = self.__synopticWeights[self.__amountRBF]
         for i in range(self.__amountRBF):
             result += self.__synopticWeights[i] * self.__getGaussPart(self.__variableSet[index], i)
-        return self.__getSimpleActivationFunction(result)
+        return self.__getActivationFunction(result)
 
     def __makeCorrection(self, vector, delta):
         deltaNorm = self.__norm * delta

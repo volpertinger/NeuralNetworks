@@ -6,6 +6,6 @@ if __name__ == '__main__':
 
     # (!(x1x2)x3x4
     # function = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0]
-    neuralNetwork = NeuralNetworkRBS(function, True, 0.1)
+    neuralNetwork = NeuralNetworkRBS(function, 0.1)
     neuralNetwork.teach()
     print(neuralNetwork.getLogStr())
