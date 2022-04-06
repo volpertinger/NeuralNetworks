@@ -48,7 +48,7 @@ class NeuralNetworkRBS:
         result = []
         for i in range(len(self.__function)):
             if self.__function[i] == self.__centerNumber:
-                result.append(i)
+                result.append(self.__getBoolVector(i))
         return result
 
     # возвращает "0", если "0" меньше "1" и "1" иначе; min (количество "0", "1" в функции)
@@ -83,7 +83,8 @@ class NeuralNetworkRBS:
     def __getGaussPart(self, vector, centerIndex):
         result = 0
         for i in range(self.__size):
-            result += pow(vector[i] - self.__weights[centerIndex][i], 2)
+            # result += (vector[i] - self.__weights[centerIndex][i]) ** 2
+            result += (vector[i] - self.__centersRBF[centerIndex][i]) ** 2
         result = math.exp(-1 * result)
         return result
 
@@ -93,28 +94,6 @@ class NeuralNetworkRBS:
         if value >= 0:
             return 1
         return 0
-
-    # возвращает значение сложной функции активации
-    def __getComplexActivationFunction(self, vector):
-        net = self.__getNet(vector)
-        return round(1 / 2 * (1 + (math.exp(net) - math.exp(-net)) / (math.exp(net) + math.exp(-net))))
-
-    # возвращает функцию активации (простую или сложную)
-    def __getActivationFunction(self, vector):
-        return self.__getSimpleActivationFunction(vector) if self.__isSimpleActivationFunction \
-            else self.__getComplexActivationFunction(vector)
-
-    # возвращает значение в узле функции активации
-    def __getNet(self, vector):
-        # константа - последняя
-        result = self.__synopticWeights[self.__amountRBF]
-        for i in range(self.__amountRBF):
-            result += self.__synopticWeights[i] * self.__getGaussPart(vector, i)
-        return result
-
-    # возвращает значение булевой функции в зависимости от значения узла функции активации
-    def __getOutput_old(self, index):
-        return self.__getActivationFunction(self.__variableSet[index])
 
     # возвращает входное значение в RBS нейрон
     def __getRBSNeuronInput(self, centerIndex, vector):
@@ -126,7 +105,7 @@ class NeuralNetworkRBS:
 
     # возвращает выход с RBS нейрона
     def __getRBSNeuronOutput(self, centerIndex, vector):
-        return self.__getGaussPart(vector,centerIndex)
+        return 1 if self.__getGaussPart(vector, centerIndex) >= 0 else 0
 
     # возвращает вектор входов из RBS нейронов
     def __getRBSVector(self, vector):
@@ -139,56 +118,20 @@ class NeuralNetworkRBS:
     def __getOutput(self, index):
         # константа
         result = self.__synopticWeights[self.__amountRBF]
-        vectorRBF = self.__getRBSVector(self.__variableSet[index])
         for i in range(self.__amountRBF):
-            result += vectorRBF[i] * self.__synopticWeights[i]
+            result += self.__synopticWeights[i] * self.__getGaussPart(self.__variableSet[index], i)
+            # result += self.__synopticWeights[i] * self.__getRBSNeuronOutput(i, self.__variableSet[index])
         return self.__getSimpleActivationFunction(result)
-
-    # возвращает дельту синоптического веса по дельте, вектору и индексу центра
-    def __getDeltaSynopticWeight(self, delta, vector, centerIndex):
-        return self.__norm * delta * self.__getGaussPart(vector, centerIndex)
-
-    # выполняет коррекцию синоптического веса по дельте, вектору, индексу центра
-    def __makeSynopticCorrectionIndex(self, delta, vector, centerIndex):
-        self.__synopticWeights[centerIndex] += self.__getDeltaSynopticWeight(delta, vector, centerIndex)
-
-    # выполняет коррекцию всех синоптических весов по вектору и дельте
-    def __makeSynopticCorrectionAll(self, vector, delta):
-        for i in range(self.__amountRBF):
-            self.__makeSynopticCorrectionIndex(delta, vector, i)
-
-    def __makeSynopticCorrectionConstant(self, delta):
-        # последний - вес константы
-        self.__synopticWeights[self.__amountRBF] += self.__norm * delta
-
-    # возвращает дельту для RBS веса от нейрона RBS до переменной
-    def __getDeltaRBS(self, delta, vector, variableIndex):
-        return self.__norm * delta * vector[variableIndex]
-
-    # производит коррекцию одного веса от переменной до нейрона RBS
-    def __makeCorrectionRBSIndex(self, delta, vector, centerIndex, variableIndex):
-        self.__weights[centerIndex][variableIndex] += self.__getDeltaRBS(delta, vector, variableIndex)
-
-    # производит коррекцию всех весов от переменной до нейрона RBS
-    def __makeCorrectionRBSAll(self, delta, vector, centerIndex):
-        for i in range(self.__size):
-            self.__makeCorrectionRBSIndex(delta, vector, centerIndex, i)
-
-    # выполняет коррекцию синоптических весов и весов от переменной до RBS нейронов
-    def __makeCorrection_old(self, vector, delta):
-        for i in range(self.__amountRBF):
-            self.__makeSynopticCorrectionIndex(delta, vector, i)
-            self.__makeCorrectionRBSAll(delta, vector, i)
-        self.__makeSynopticCorrectionConstant(delta)
 
     def __makeCorrection(self, vector, delta):
         deltaNorm = self.__norm * delta
         # константа
         self.__synopticWeights[self.__amountRBF] += deltaNorm
         for i in range(self.__amountRBF):
-            outputRBS = self.__getRBSNeuronOutput(i, vector)
-            self.__synopticWeights[i] += deltaNorm * outputRBS
-            deltaNormRBS = deltaNorm * self.__getGaussPart(vector, i)
+            gp = self.__getGaussPart(vector, i)
+            self.__synopticWeights[i] += deltaNorm * self.__getGaussPart(vector, i)
+            # ошибка обычных весов
+            deltaNormRBS = self.__synopticWeights[i] * deltaNorm
             # константа
             self.__weights[i][self.__size] += deltaNormRBS
             # коррекция весов от переменных к нейронам RBF
