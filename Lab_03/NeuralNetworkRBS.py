@@ -15,7 +15,7 @@ class NeuralNetworkRBS:
                 self.__weights) + '\n' + 'Function: ' + str(
                 self.__function) + '\n' + 'Delta: ' + str(self.__delta) + '\n'
 
-    def __init__(self, function, norm=0.3, teachIndexes=None):
+    def __init__(self, function, isSimpleFunction=True, norm=0.3, teachIndexes=None):
         # вектор значений функции
         self.__function = function
         # количество переменных в функции
@@ -36,8 +36,12 @@ class NeuralNetworkRBS:
         self.__generationsDelta = []
         # индексы, по которым проводится обучение
         self.__teachIndexes = self.__getTeachIndexes(teachIndexes)
+        # индексы, по которым проводится проверка
+        self.__testIndexes = self.__getTestIndexes()
         # показатель обученности сети
         self.__isTrained = False
+        # простая или нет функция активации
+        self.__isSimpleFunction = isSimpleFunction
 
     def __addLog(self, weights, function):
         self.__log.append(
@@ -51,6 +55,7 @@ class NeuralNetworkRBS:
             result.append(self.__getBoolVector(i))
         return result
 
+    # возвращает индексы, на которых обучаем сеть
     def __getTeachIndexes(self, teachIndexes):
         if teachIndexes is None:
             result = []
@@ -58,6 +63,14 @@ class NeuralNetworkRBS:
                 result.append(i)
             return result
         return teachIndexes
+
+    # возвращает индексы, на которых сеть проверяется (и не обучается)
+    def __getTestIndexes(self):
+        result = []
+        for i in range(len(self.__variableSet)):
+            if self.__teachIndexes.count(i) == 0:
+                result.append(i)
+        return result
 
     # по номеру возвращает двоичный вектор
     def __getBoolVector(self, number):
@@ -108,10 +121,20 @@ class NeuralNetworkRBS:
 
     # возвращает значение простой функцию активации
     @staticmethod
-    def __getActivationFunction(value):
+    def __getSimpleActivationFunction(value):
         if value > 0:
             return 1
         return 0
+
+    # возвращает значение сложной функцию активации
+    @staticmethod
+    def __getComplexActivationFunction(value):
+        return round(1 / 2 * (1 + (math.exp(value) - math.exp(-value)) / (math.exp(value) + math.exp(-value))))
+
+    def __getActivationFunction(self, value):
+        if self.__isSimpleFunction:
+            return self.__getSimpleActivationFunction(value)
+        return self.__getComplexActivationFunction(value)
 
     # возвращает выход из выходов нейронов RBF
     def __getOutput(self, index):
@@ -119,10 +142,14 @@ class NeuralNetworkRBS:
         result = self.__synopticWeights[self.__amountRBF]
         for i in range(self.__amountRBF):
             result += self.__synopticWeights[i] * self.__getGaussPart(self.__variableSet[index], i)
-        return self.__getActivationFunction(result)
+        return self.__getSimpleActivationFunction(result)
 
-    def __makeCorrection(self, vector, delta):
+    # коррекция синоптических весов
+    def __makeCorrection(self, vector, delta, output):
         deltaNorm = self.__norm * delta
+        # если функция активации сложная, умножим на производную
+        if not self.__isSimpleFunction:
+            deltaNorm *= 2 / (pow(math.exp(output) + math.exp(-output), 2))
         # константа
         self.__synopticWeights[self.__amountRBF] += deltaNorm
         for i in range(self.__amountRBF):
@@ -153,7 +180,8 @@ class NeuralNetworkRBS:
         for i in self.__teachIndexes:
             delta = self.__getDelta(i)
             if delta != 0:
-                self.__makeCorrection(self.__variableSet[i], delta)
+                output = self.__getOutput(i)
+                self.__makeCorrection(self.__variableSet[i], delta, output)
                 generationDelta += 1
         self.__generationsDelta.append(generationDelta)
         self.__addLog(currentWeights, currentFunction)
@@ -190,3 +218,85 @@ class NeuralNetworkRBS:
     # возвращает дельту
     def __getDelta(self, index):
         return self.__function[index] - self.__getOutput(index)
+
+    # возвращает сеть к исходному состоянию
+    def __reset(self, savedTeachIndexes):
+        self.__teachIndexes = savedTeachIndexes
+        self.__testIndexes = self.__getTestIndexes()
+        self.__weights = [0.] * self.__size
+        self.__constantWeight = 0.
+        self.__log = []
+        self.__generationsDelta = []
+        self.__isTrained = False
+
+    # возвращает показатель обученности сети
+    def isTrained(self):
+        return self.__isTrained
+
+    # получаем минимальный набор, на котором можно обучить сеть
+    def getMinTeachIndexes(self):
+        savedTeachIndexes = self.__teachIndexes
+        self.__testIndexes = self.__getTestIndexes()
+
+        result = self.__teachIndexes
+        currentSize = len(result)
+        isTrained = True
+        while currentSize > 0 and isTrained:
+            isTrained = False
+            for indexes in self.__getPossibleIndexes(currentSize):
+                self.__reset(indexes)
+                self.teach()
+                if self.isTrained():
+                    result = indexes
+                    currentSize -= 1
+                    isTrained = True
+                    break
+
+        self.__reset(savedTeachIndexes)
+        return result
+
+    # устанавливаем индексы для обучения
+    def setTeachIndexes(self, teachIndexes):
+        if teachIndexes is None:
+            return False
+
+        for element in teachIndexes:
+            if element < 0 or element >= len(self.__function):
+                return False
+
+        teachIndexes.sort()
+        for i in range(len(teachIndexes) - 1):
+            if teachIndexes[i] == teachIndexes[i + 1]:
+                return False
+
+        self.__teachIndexes = teachIndexes
+        self.__testIndexes = self.__getTestIndexes()
+        return True
+
+    # возвращает всевозможные перестановки индексов
+    def __getPossibleIndexes(self, size):
+        result = [[]]
+        for i in range(size):
+            result[0].append(i)
+        if size > len(self.__function):
+            return result
+        while True:
+            lastIndexes = result[len(result) - 1]
+            newIndexes = moveIndexes(lastIndexes, size - 1, len(self.__function))
+            if newIndexes is not False:
+                result.append(deepcopy(newIndexes))
+                continue
+            break
+        return result
+
+
+# перемещает индексы для нахождения перестановок
+def moveIndexes(array, index, wall):
+    if array[index] < wall - 1:
+        array[index] += 1
+        for i in range(index, len(array)):
+            array[i] = array[index] + i - index
+        return array
+    if index == 0:
+        return False
+    return moveIndexes(array, index - 1, array[index])
