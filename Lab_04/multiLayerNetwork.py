@@ -16,9 +16,9 @@ class NeuralNetwork:
     class __Log:
         def __init__(self, gen, weightsOpen, weightsHide, function, delta):
             self.__gen = gen
-            self.__weightsOpen = weightsOpen
-            self.__weightsHide = weightsHide
-            self.__function = function
+            self.__weightsOpen = deepcopy(weightsOpen)
+            self.__weightsHide = deepcopy(weightsHide)
+            self.__function = deepcopy(function)
             self.__delta = delta
 
         def __str__(self):
