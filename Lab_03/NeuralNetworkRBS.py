@@ -187,6 +187,7 @@ class NeuralNetworkRBS:
         self.__addLog(currentWeights, currentFunction)
         return generationDelta
 
+    # проверяет функцию после обучения
     def __testAfterTeach(self):
         for i in range(len(self.__variableSet)):
             delta = self.__getDelta(i)
@@ -221,9 +222,9 @@ class NeuralNetworkRBS:
 
     # возвращает сеть к исходному состоянию
     def __reset(self, savedTeachIndexes):
-        self.__teachIndexes = savedTeachIndexes
-        self.__testIndexes = self.__getTestIndexes()
-        self.__weights = [0.] * self.__size
+        self.__teachIndexes = deepcopy(savedTeachIndexes)
+        self.__testIndexes = deepcopy(self.__getTestIndexes())
+        self.__synopticWeights = [0.] * (self.__amountRBF + 1)
         self.__constantWeight = 0.
         self.__log = []
         self.__generationsDelta = []
@@ -235,7 +236,7 @@ class NeuralNetworkRBS:
 
     # получаем минимальный набор, на котором можно обучить сеть
     def getMinTeachIndexes(self):
-        savedTeachIndexes = self.__teachIndexes
+        savedTeachIndexes = deepcopy(self.__teachIndexes)
         self.__testIndexes = self.__getTestIndexes()
 
         result = self.__teachIndexes
@@ -244,10 +245,10 @@ class NeuralNetworkRBS:
         while currentSize > 0 and isTrained:
             isTrained = False
             for indexes in self.__getPossibleIndexes(currentSize):
-                self.__reset(indexes)
+                self.__reset(deepcopy(indexes))
                 self.teach()
                 if self.isTrained():
-                    result = indexes
+                    result = deepcopy(indexes)
                     currentSize -= 1
                     isTrained = True
                     break

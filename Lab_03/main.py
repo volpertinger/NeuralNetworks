@@ -6,6 +6,7 @@ if __name__ == '__main__':
 
     # (!(x1x2)x3x4
     # function = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0]
+
     print("Simple function, all vectors")
     boolNeuron = NeuralNetworkRBS(function)
     boolNeuron.teach()
