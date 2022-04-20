@@ -8,7 +8,7 @@ if __name__ == '__main__':
     # function = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0]
 
     print("Simple function, all vectors")
-    boolNeuron = NeuralNetworkRBS(function)
+    boolNeuron = NeuralNetworkRBS(function, True, 100)
     boolNeuron.teach()
     print(boolNeuron.getLogStr())
     print()
