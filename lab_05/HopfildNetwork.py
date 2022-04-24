@@ -1,4 +1,5 @@
 from copy import deepcopy
+import numpy
 
 
 # возвращает матрицу кодировки для данного числа
@@ -37,6 +38,14 @@ def getVectorFromMatrix(matrix):
     for i in range(len(matrix)):
         for j in range(len(matrix[i])):
             result.append(matrix[i][j])
+    return result
+
+
+# возвращает матрицу после умножения
+def multiplyMatrix(lhs, rhs):
+    lhs = numpy.array(deepcopy(lhs))
+    rhs = numpy.array(deepcopy(rhs))
+    result = lhs.dot(rhs)
     return result
 
 
