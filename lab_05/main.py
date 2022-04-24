@@ -26,12 +26,12 @@ if __name__ == '__main__':
     # проверка на полностью верных данных
     print('Right vectors\n')
     for vector in vectors_initial:
-        print(array(vector))
-        print(hopfildNetwork.getOutputVector(vector))
+        print('input:  ', array(vector))
+        print('output: ', hopfildNetwork.getOutputVector(vector))
         print()
     # проверка частично искаженных векторов
     print('Corrupted vectors\n')
     for vector in vectors_corrupted:
-        print(array(vector))
-        print(hopfildNetwork.getOutputVector(vector))
+        print('input:  ', array(vector))
+        print('output: ', hopfildNetwork.getOutputVector(vector))
         print()
