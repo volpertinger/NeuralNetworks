@@ -48,12 +48,12 @@ class HopfildNetwork:
         self.__images = images
         # матричные кодировки обучающих образцов
         self.__matrixArray = self.__getMatrixArray()
-        # матрица весов
-        self.__weights = self.__getInitWeights()
         # количество пикселей в матрице каждого числа
         self.__amountPixels = self.__getAmountPixels()
         # массив векторных представлений кодировки обучающих образцов
         self.__vectorPatterns = self.__getVectorPatterns()
+        # матрица весов
+        self.__weights = self.__getInitWeights()
 
     # возвращает векторное представление кодировки обучающих векторов
     def __getVectorPatterns(self):
@@ -66,15 +66,8 @@ class HopfildNetwork:
     def __getAmountPixels(self):
         return len(self.__matrixArray) * len(self.__matrixArray[0])
 
-    # обнуляется главная диагональ весов
-    def __zeroMainDiag(self):
-        for i in range(len(self.__weights)):
-            for j in range(len(self.__weights)):
-                if i == j:
-                    self.__weights[i][j] = 0
-
     # создается пустая матрица весов нужного размерв
-    def __getInitWeights(self):
+    def __getEmptyWeights(self):
         result = []
         matrix_size = self.__imageNumber * len(self.__matrixArray[0])
         # заполняем матрицу пустотой
@@ -82,6 +75,24 @@ class HopfildNetwork:
             result.append([])
             for j in range(matrix_size):
                 result[i].append([])
+        return result
+
+    # возвращает сумму в вычислении весов
+    def __getVectorSum(self, lhs_index, rhs_index):
+        result = 0
+        for i in range(self.__imageNumber):
+            result += self.__vectorPatterns[i][lhs_index] * self.__vectorPatterns[i][rhs_index]
+        return result
+
+    # вычисляются начальные компоненты матрицы весов
+    def __getInitWeights(self):
+        result = self.__getEmptyWeights()
+        for i in range(len(result)):
+            for j in range(len(result[i])):
+                if i != j:
+                    result[i][j] = self.__getVectorSum(i, j)
+                else:
+                    result[i][j] = 0
         return result
 
     # возвращает массив матриц закодированных объектов
@@ -123,12 +134,16 @@ class HopfildNetwork:
 
     # строковое представление класса - строковое представление матрицы весов и векторов обучающих образцов
     def __str__(self):
-        result = ""
+        result = "Weights\n"
         for i in range(len(self.__weights)):
             for j in range(len(self.__weights[i])):
-                result += str(self.__weights[i][j])
+                number = self.__weights[i][j]
+                if number < 0:
+                    result += ' ' + str(number)
+                else:
+                    result += '  ' + str(number)
             result += '\n'
-        result += '\n'
+        result += '\nVectors\n'
         for vector in self.__vectorPatterns:
             result += str(vector)
             result += '\n'

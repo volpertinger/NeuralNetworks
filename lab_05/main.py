@@ -5,5 +5,5 @@ from HopfildNetwork import HopfildNetwork
 
 if __name__ == '__main__':
     hopfildNetwork = HopfildNetwork([3, 5, 7])
-    print(hopfildNetwork.getMatrixArrayStr())
+    # print(hopfildNetwork.getMatrixArrayStr())
     print(hopfildNetwork)
