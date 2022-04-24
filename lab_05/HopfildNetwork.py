@@ -141,6 +141,16 @@ class HopfildNetwork:
             result += "\n"
         return result
 
+    # возвращает результат умножения входного вектора на матрицу весов
+    def getOutputVector(self, vector):
+        vector = multiplyMatrix(vector, self.__weights)
+        for i in range(len(vector)):
+            if vector[i] > 0:
+                vector[i] = 1
+            if vector[i] <= 0:
+                vector[i] = -1
+        return vector
+
     # строковое представление класса - строковое представление матрицы весов и векторов обучающих образцов
     def __str__(self):
         result = "Weights\n"
