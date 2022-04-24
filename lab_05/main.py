@@ -35,5 +35,3 @@ if __name__ == '__main__':
         print(array(vector))
         print(hopfildNetwork.getOutputVector(vector))
         print()
-    # print(vector)
-    # print(hopfildNetwork.getOutputVector(vector))
