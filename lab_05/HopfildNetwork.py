@@ -18,6 +18,7 @@ def getNumberCode(number):
     return deepcopy(numberCode.get(number))
 
 
+# возвращает строковое представление матрицы закодированного объекта
 def getStrMatrix(matrix):
     result = ""
     for i in range(len(matrix)):
@@ -27,6 +28,15 @@ def getStrMatrix(matrix):
             else:
                 result += " "
         result += '\n'
+    return result
+
+
+# возвращает вектор из матрицы
+def getVectorFromMatrix(matrix):
+    result = []
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            result.append(matrix[i][j])
     return result
 
 
@@ -42,6 +52,15 @@ class HopfildNetwork:
         self.__weights = self.__getInitWeights()
         # количество пикселей в матрице каждого числа
         self.__amountPixels = self.__getAmountPixels()
+        # массив векторных представлений кодировки обучающих образцов
+        self.__vectorPatterns = self.__getVectorPatterns()
+
+    # возвращает векторное представление кодировки обучающих векторов
+    def __getVectorPatterns(self):
+        result = []
+        for i in range(self.__imageNumber):
+            result.append(getVectorFromMatrix(self.__matrixArray[i]))
+        return result
 
     # возвращает количество пикселей (размер матрицы запоминаемого объекта)
     def __getAmountPixels(self):
@@ -102,11 +121,15 @@ class HopfildNetwork:
             result += "\n"
         return result
 
-    # строковое представление класса - строковое представление матрицы весов
+    # строковое представление класса - строковое представление матрицы весов и векторов обучающих образцов
     def __str__(self):
         result = ""
         for i in range(len(self.__weights)):
             for j in range(len(self.__weights[i])):
                 result += str(self.__weights[i][j])
+            result += '\n'
+        result += '\n'
+        for vector in self.__vectorPatterns:
+            result += str(vector)
             result += '\n'
         return result
