@@ -14,17 +14,17 @@ if __name__ == '__main__':
     data = open(data_path, 'r', encoding='windows-1251')
     json_data = json.load(data)
     data.close()
-    coordinates = NeuralNetworkKohenen.getCoordinates(json_data)
+    hospitals = NeuralNetworkKohenen.getHospitals(json_data)
 
     neuralNetwork = NeuralNetworkKohenen.NeuralNetwork()
-    for coordinate in coordinates:
-        neuralNetwork.insert(coordinate)
+    for hospital in hospitals:
+        neuralNetwork.insert(hospital)
 
     clusters = neuralNetwork.getClusters()
 
-    print("Initial coordinates:")
-    for coordinate in coordinates:
-        print(coordinate)
+    print("Initial hospitals:")
+    for hospital in hospitals:
+        print(hospital)
     print()
 
     print("Cluster`s centers coordinates")
@@ -40,3 +40,7 @@ if __name__ == '__main__':
         for element in clusters.get(key):
             print(element)
         print()
+    print()
+
+    print("Issues rate")
+    print(neuralNetwork.countIssues())
