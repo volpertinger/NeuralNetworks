@@ -27,11 +27,17 @@ if __name__ == '__main__':
     print('Right vectors\n')
     for vector in vectors_initial:
         print('input:  ', array(vector))
-        print('output: ', hopfildNetwork.getOutputVector(vector))
+        print(hopfildNetwork.getStrMatrixFromVector(vector))
+        output = hopfildNetwork.getOutputVector(vector)
+        print('output: ', output)
+        print(hopfildNetwork.getStrMatrixFromVector(output))
         print()
     # проверка частично искаженных векторов
     print('Corrupted vectors\n')
     for vector in vectors_corrupted:
         print('input:  ', array(vector))
-        print('output: ', hopfildNetwork.getOutputVector(vector))
+        print(hopfildNetwork.getStrMatrixFromVector(vector))
+        output = hopfildNetwork.getOutputVector(vector)
+        print('output: ', output)
+        print(hopfildNetwork.getStrMatrixFromVector(output))
         print()

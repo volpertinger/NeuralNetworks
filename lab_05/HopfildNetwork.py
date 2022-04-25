@@ -169,3 +169,14 @@ class HopfildNetwork:
             result += str(vector)
             result += '\n'
         return result
+
+    # возвращает матричное строковое представление из вектора
+    def getStrMatrixFromVector(self, vector):
+        index = 0
+        result = []
+        for i in range(len(self.__matrixArray[0])):
+            result.append([])
+            for j in range(len(self.__matrixArray[0][0])):
+                result[i].append(vector[index])
+                index += 1
+        return getStrMatrix(result)
